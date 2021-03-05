@@ -1,5 +1,7 @@
 # kth virtual machine 
 *.ova
+vm_readme.md
+vm_shared/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
