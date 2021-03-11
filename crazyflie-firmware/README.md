@@ -1,3 +1,7 @@
+# Changes
+
+In the following sections, the original crazyflie-firmware is described. Keep in mind that the version of this repository contains several changes in the firmware that could also affect the handling statements which are mentioned below.
+
 # Crazyflie Firmware  [![CI](https://github.com/bitcraze/crazyflie-firmware/workflows/CI/badge.svg)](https://github.com/bitcraze/crazyflie-firmware/actions?query=workflow%3ACI)
 
 This project contains the source code for the firmware used in the Crazyflie range of platforms, including
