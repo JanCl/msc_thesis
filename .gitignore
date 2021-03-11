@@ -6,7 +6,9 @@ crazyflie-clients-python/
 crazyflie-lib-python/
 firmware-cf2-2021.01/
 unused/
-Firmware-cf2-2021.01.zip
+firmware_git_files/
+firmware-cf2-2021.01.zip
+
 
 # osx file
 .DS_Store
