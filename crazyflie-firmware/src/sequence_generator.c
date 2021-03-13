@@ -45,27 +45,39 @@ bool check_constraint(int iteration, constraint con, char former[], int n, int m
 		}
 		case meets_row_n_in_m:{
 			int ahead = m - 1;
-			if (iteration < ahead)
-				ahead = iteration;
-			char* worst = (char*) malloc((ahead + m) * sizeof(char));
+			char* worst = (char*) malloc((ahead + m) * sizeof(char) + 1);
 			for (int i = 0; i < ahead; i++)
 				worst[i] = former[iteration - ahead + i];
 			worst[ahead] = '0'; // actual next (Miss)
 			for (int i = 1; i < m; i++)
 				worst[ahead + i] = '1';	// to the rescue
-			char* one_substring = (char*) malloc(n * sizeof(char));
+			worst[ahead + m] = '\0';
+			char* one_substring = (char*) malloc(n * sizeof(char) + 1);
 			for (int i = 0; i < n; i++)
 				one_substring[i] = '1';	
-			return (strstr(worst, one_substring) != NULL); // strstr() returns pointer to start of z_s in a_m iff found
+			one_substring[n] = '\0';
+			bool possible = true;
+			for (int i = 0; i < m; i++){
+				char* to_test = (char*) malloc(m * sizeof(char));
+				strncpy(to_test, worst + i, m);
+				possible = possible && (strstr(to_test, one_substring) != NULL);
+				free(to_test);
+			}
+			free(worst);
+			free(one_substring);
+			return possible;
 		}
 		case misses_any_n_in_m:{
 			return check_constraint(iteration, meets_any_n_in_m, former, m - n, m);
 		}
 		case misses_row_n_in_m:{
-			char* zero_substring = (char*) malloc(n * sizeof(char));
+			char* zero_substring = (char*) malloc(n * sizeof(char) + 1);
 			for (int i = 0; i < n; i++)
 				zero_substring[i] = '0';
-			return (strstr(appended_miss, zero_substring) == NULL); // strstr() returns pointer to start of z_s in a_m iff found
+			zero_substring[n] = '\0';
+			bool out = (strstr(appended_miss, zero_substring) == NULL); // strstr() returns pointer to start of z_s in a_m iff found
+			free(zero_substring);
+			return out;
 		}
 	}
 }
@@ -74,25 +86,31 @@ bool check_constraint(int iteration, constraint con, char former[], int n, int m
 void generate_sequence(constraint con, int length, float miss_probability, int n, int m){
 	if (length < m) 
 		printf("! Warning ! \nLength of sequence is shorter than m, any sequence would be valid \n");
-	char res[length];
-	for (int i = 0; i < length; i++){
-		if (check_constraint(i, con,  res, n, m)){
-			float x = (float)rand()/(float)RAND_MAX;
-			if (x < miss_probability)
-				res[i] = '0';
-			else 
-				res[i] = '1';
-		} else
-				res[i] = '1';
+	char res[length + m];
+	for (int i = 0; i < length + m; i++){
+		if (i < m)
+			res[i] = '1'; // hit padding
+		else {
+			if (check_constraint(i, con,  res, n, m)){
+				float x = (float)rand()/(float)RAND_MAX;
+				if (x < miss_probability)
+					res[i] = '0';
+				else 
+					res[i] = '1';
+			} else
+					res[i] = '1';
+		}
 	}
-	printf("%s \n", res);
+	char out[length];
+	strncpy(out, res + m, length);
+	printf("Substring of length %d : \n%s \n", length, out);
 }
 
 int main() {
 	srand(time(NULL));
-	//generate_sequence(meets_any_n_in_m, 150 , 0.7, 3, 5);
-	generate_sequence(meets_row_n_in_m, 150 , 0.7, 3, 5); // buggy rn
-	//generate_sequence(misses_any_n_in_m, 150 , 0.7, 2, 5);
-	//generate_sequence(misses_row_n_in_m, 150 , 0.7, 2, 10);
+	generate_sequence(meets_any_n_in_m, 150 , 0.7, 3, 5);
+	generate_sequence(meets_row_n_in_m, 150 , 0.7, 3, 7); // buggy rn
+	generate_sequence(misses_any_n_in_m, 150 , 0.7, 2, 5);
+	generate_sequence(misses_row_n_in_m, 150 , 0.7, 4, 15);
 	return(0);
 } 
