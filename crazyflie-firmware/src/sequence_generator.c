@@ -10,60 +10,38 @@ bool check = false;
 // returns true if the constraint is still fullfilled even if appended a 0 / Miss
 bool check_constraint(int iteration, constraint con, char former[], int n, int m){
 	char appended_miss[iteration+1];
-	for (int i = 0; i < iteration; i++){
-		appended_miss[i] = former[i];
-	}
+	strncpy(appended_miss, former, iteration);
 	appended_miss[iteration] = '0';
 	switch (con){
 		case meets_any_n_in_m:{
-			if (m < iteration){
-				int ones = 0;
-				for (int i = 0; i < m; i++){
-					ones += (int) appended_miss[iteration - i] - 48 ;
-				}
-				return (ones >= n);
+			int ones = 0;
+			for (int i = 0; i < m; i++){
+				ones += (int) appended_miss[iteration - i] - 48 ;
 			}
-			if (check){ // kind of buggy rn 
-				for (int i = 0; i < iteration - m; i++){
-					int ones = 0;
-					for (int j = 0; j < m; j++){
-						ones += (int) appended_miss[i+j] - 48 ; // Casting '1' to 1 and '0' to 0
-					}
-					assert(ones >= n);
-				}	
-			} 
-			if (iteration <= m){
-				int ones = 0;
-				for (int i = 0; i < iteration; i++){
-					ones += (int) appended_miss[i] - 48 ;
-				}
-				if (ones + m - iteration == n){
-					return false;
-				}
-			}
-			return true;
+			return (ones >= n);
 		}
+		
 		case meets_row_n_in_m:{
 			int ahead = m - 1;
-			char* worst = (char*) malloc((ahead + m) * sizeof(char) + 1);
+			char* best_case = (char*) malloc(2 * m * sizeof(char));
 			for (int i = 0; i < ahead; i++)
-				worst[i] = former[iteration - ahead + i];
-			worst[ahead] = '0'; // actual next (Miss)
+				best_case[i] = former[iteration - ahead + i];
+			best_case[ahead] = '0'; // actual next (Miss)
 			for (int i = 1; i < m; i++)
-				worst[ahead + i] = '1';	// to the rescue
-			worst[ahead + m] = '\0';
-			char* one_substring = (char*) malloc(n * sizeof(char) + 1);
+				best_case[ahead + i] = '1';	// to the rescue
+			best_case[ahead + m] = '\0';
+			char* one_substring = (char*) malloc((n + 1) * sizeof(char));
 			for (int i = 0; i < n; i++)
 				one_substring[i] = '1';	
 			one_substring[n] = '\0';
 			bool possible = true;
 			for (int i = 0; i < m; i++){
 				char* to_test = (char*) malloc(m * sizeof(char));
-				strncpy(to_test, worst + i, m);
+				strncpy(to_test, best_case + i, m);
 				possible = possible && (strstr(to_test, one_substring) != NULL);
 				free(to_test);
 			}
-			free(worst);
+			free(best_case);
 			free(one_substring);
 			return possible;
 		}
@@ -91,12 +69,9 @@ void generate_sequence(constraint con, int length, float miss_probability, int n
 		if (i < m)
 			res[i] = '1'; // hit padding
 		else {
-			if (check_constraint(i, con,  res, n, m)){
-				float x = (float)rand()/(float)RAND_MAX;
-				if (x < miss_probability)
+			float x = (float)rand()/(float)RAND_MAX;
+			if (check_constraint(i, con,  res, n, m) && x < miss_probability){
 					res[i] = '0';
-				else 
-					res[i] = '1';
 			} else
 					res[i] = '1';
 		}
